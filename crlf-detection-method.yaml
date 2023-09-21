@@ -1,0 +1,30 @@
+id: crlf-detection-method
+
+info:
+  name: CRLF - Injection Detection Methods
+  author: reewardius
+  severity: info
+  description: CRLF sequences were not properly sanitized.
+  reference:
+    - https://youtu.be/p1ClNhaoZQ8
+  tags: crlf
+  metadata:
+    max-request: 3
+    
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/%20H
+      - "{{BaseURL}}/%20HTTP/13.37%0D%0AX:%20X
+      - "{{BaseURL}}/%20HTTP/1.1%0D%0AHost:%20x
+      
+    stop-at-first-match: true
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 400
+          
+      - type: status
+        status:
+          - 505
