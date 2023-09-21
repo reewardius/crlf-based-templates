@@ -14,9 +14,9 @@ info:
 http:
   - method: GET
     path:
-      - "{{BaseURL}}/%20H
-      - "{{BaseURL}}/%20HTTP/13.37%0D%0AX:%20X
-      - "{{BaseURL}}/%20HTTP/1.1%0D%0AHost:%20x
+      - "{{BaseURL}}/%20H"
+      - "{{BaseURL}}/%20HTTP/13.37%0D%0AX:%20X"
+      - "{{BaseURL}}/%20HTTP/1.1%0D%0AHost:%20x"
       
     stop-at-first-match: true
     matchers-condition: or
