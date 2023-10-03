@@ -78,3 +78,8 @@ http:
           - 301
           - 400
         condition: or
+        
+      - type: word
+        part: header
+        words:
+          - "text/html"
