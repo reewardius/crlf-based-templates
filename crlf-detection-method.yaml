@@ -28,8 +28,8 @@ http:
         
       - type: dsl
         dsl:
-          - status_code_1 != 400
-          - status_code_3 = 505
+          - status_code_1 !== 400
+          - status_code_3 == 505
         condition: and
         
       - type: dsl
